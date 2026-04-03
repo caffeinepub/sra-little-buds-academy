@@ -1,0 +1,1722 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Toaster } from "@/components/ui/sonner";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Heart,
+  LogOut,
+  MapPin,
+  Menu,
+  Phone,
+  Sparkles,
+  Star,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { SiFacebook, SiInstagram, SiWhatsapp, SiYoutube } from "react-icons/si";
+import { toast } from "sonner";
+import aboutImg from "/assets/generated/about-classroom.dim_700x500.jpg";
+import galleryActivitiesImg from "/assets/generated/gallery-activities.dim_600x400.jpg";
+import galleryAvLearningImg from "/assets/generated/gallery-av-learning.dim_600x400.jpg";
+import galleryEventsImg from "/assets/generated/gallery-events.dim_600x400.jpg";
+import galleryOutdoorImg from "/assets/generated/gallery-outdoor.dim_600x400.jpg";
+import heroImg from "/assets/generated/hero-teacher-kids.dim_800x600.jpg";
+import logoImg from "/assets/logo.jpeg";
+import AuthPage from "./components/AuthPage";
+import { useSubmitInquiry } from "./hooks/useQueries";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface Testimonial {
+  quote: string;
+  name: string;
+  role: string;
+  initials: string;
+  accentClass: string;
+  borderColor: string;
+  rating: number;
+}
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+const NAV_LINKS = [
+  { label: "Home", href: "#home" },
+  { label: "About", href: "#about" },
+  { label: "Programs", href: "#programs" },
+  { label: "Facilities", href: "#facilities" },
+  { label: "Gallery", href: "#gallery" },
+  { label: "Testimonials", href: "#testimonials" },
+  { label: "Contact", href: "#contact" },
+];
+
+const PROGRAMS = [
+  {
+    icon: "🎨",
+    title: "Montessori Learning",
+    age: "Ages 2–6",
+    desc: "Hands-on, child-led discovery with carefully designed Montessori materials that spark curiosity and build independence.",
+    bg: "bg-yellow-pastel",
+  },
+  {
+    icon: "🖥️",
+    title: "Audio-Visual Teaching",
+    age: "Ages 3–6",
+    desc: "Engaging multimedia lessons that make concepts come alive through interactive screens, videos, and digital storytelling.",
+    bg: "bg-blue-pastel",
+  },
+  {
+    icon: "🎯",
+    title: "Activity-Based Learning",
+    age: "Ages 2–5",
+    desc: "Structured play activities designed to teach through experience—puzzles, games, art, and group projects.",
+    bg: "bg-pink-pastel",
+  },
+  {
+    icon: "🧠",
+    title: "Skills Development",
+    age: "Ages 3–6",
+    desc: "Focused programs nurturing cognitive, social, emotional, and creative skills for holistic child development.",
+    bg: "bg-green-pastel",
+  },
+];
+
+const FACILITIES = [
+  {
+    icon: "🏫",
+    title: "Montessori Classrooms",
+    desc: "Spacious, well-equipped rooms with authentic Montessori learning materials.",
+    iconBg: "bg-yellow-pastel",
+  },
+  {
+    icon: "🎮",
+    title: "Indoor Play Area",
+    desc: "Safe indoor play zones with age-appropriate toys, puzzles, and games.",
+    iconBg: "bg-blue-pastel",
+  },
+  {
+    icon: "🛝",
+    title: "Outdoor Playground",
+    desc: "Designed outdoor play area with slides, swings, and open green spaces.",
+    iconBg: "bg-green-pastel",
+  },
+  {
+    icon: "🛡️",
+    title: "Safe Environment",
+    desc: "CCTV-monitored, child-proofed premises with trained staff at all times.",
+    iconBg: "bg-pink-pastel",
+  },
+  {
+    icon: "📺",
+    title: "Audio-Visual Room",
+    desc: "Dedicated AV room with projector and interactive screens for multimedia learning.",
+    iconBg: "bg-blue-pastel",
+  },
+];
+
+const GALLERY_ITEMS = [
+  {
+    label: "Classroom",
+    src: aboutImg,
+  },
+  {
+    label: "Activities",
+    src: galleryActivitiesImg,
+  },
+  {
+    label: "Outdoor Play",
+    src: galleryOutdoorImg,
+  },
+  {
+    label: "Events",
+    src: galleryEventsImg,
+  },
+  {
+    label: "Learning",
+    src: galleryAvLearningImg,
+  },
+  {
+    label: "Fun Time",
+    src: heroImg,
+  },
+];
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      "The teaching methods here are amazing! My daughter loves going to school every day. The Montessori approach has made her so confident and curious.",
+    name: "Priya Sharma",
+    role: "Parent of Ananya, Age 4",
+    initials: "PS",
+    accentClass: "bg-yellow-pastel",
+    borderColor: "border-t-amber-300",
+    rating: 5,
+  },
+  {
+    quote:
+      "Excellent Montessori environment. My son has grown so much since joining. The teachers are patient, caring, and truly dedicated to each child.",
+    name: "Kavitha R.",
+    role: "Parent of Arjun, Age 3",
+    initials: "KR",
+    accentClass: "bg-blue-pastel",
+    borderColor: "border-t-sky-300",
+    rating: 4,
+  },
+  {
+    quote:
+      "Safe, clean, and such caring teachers. Best school in Sulur! My child comes home every day with something new she learned. Highly satisfied!",
+    name: "Meena Krishnan",
+    role: "Parent of Divya, Age 5",
+    initials: "MK",
+    accentClass: "bg-pink-pastel",
+    borderColor: "border-t-rose-300",
+    rating: 5,
+  },
+  {
+    quote:
+      "My child learned so much through fun activities. The audio-visual room is a great touch. Highly recommended for all parents in the area!",
+    name: "Lakshmi V.",
+    role: "Parent of Rahul, Age 4",
+    initials: "LV",
+    accentClass: "bg-green-pastel",
+    borderColor: "border-t-emerald-300",
+    rating: 4,
+  },
+  {
+    quote:
+      "The audio-visual learning approach is fantastic. Teachers are well-trained and the school has a wonderful, nurturing atmosphere for kids.",
+    name: "Anitha S.",
+    role: "Parent of Keerthana, Age 3",
+    initials: "AS",
+    accentClass: "bg-yellow-pastel",
+    borderColor: "border-t-amber-300",
+    rating: 5,
+  },
+];
+
+// ─── Scroll Animation Hook ────────────────────────────────────────────────────
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return { ref, visible };
+}
+
+function RevealSection({
+  children,
+  className = "",
+}: { children: React.ReactNode; className?: string }) {
+  const { ref, visible } = useScrollReveal();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ─── Section Header ───────────────────────────────────────────────────────────
+function SectionHeader({
+  eyebrow,
+  title,
+  subtitle,
+}: { eyebrow: string; title: string; subtitle?: string }) {
+  return (
+    <div className="text-center mb-16">
+      <div className="inline-flex items-center gap-2 mb-4">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+        <span className="text-xs font-black uppercase tracking-[0.18em] text-primary">
+          {eyebrow}
+        </span>
+        <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+      </div>
+      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground heading-accent pb-4">
+        {title}
+      </h2>
+      {subtitle && (
+        <p className="text-muted-foreground mt-6 max-w-xl mx-auto text-base leading-relaxed">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Star Rating ──────────────────────────────────────────────────────────────
+function StarRating({ count = 5 }: { count?: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }, (_, i) => i).map((val) => (
+        <Star
+          key={val}
+          className={`w-4 h-4 ${val < count ? "fill-amber-400 text-amber-400" : "fill-muted text-muted-foreground/30"}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Hero SVG Doodles ─────────────────────────────────────────────────────────
+function HeroDoodles() {
+  return (
+    <>
+      {/* Soft blob behind image column */}
+      <svg
+        aria-hidden="true"
+        className="absolute top-0 right-0 w-1/2 h-full opacity-40 pointer-events-none"
+        viewBox="0 0 600 700"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="380"
+          cy="320"
+          rx="260"
+          ry="280"
+          fill="oklch(0.91 0.11 87)"
+        />
+        <ellipse
+          cx="480"
+          cy="200"
+          rx="160"
+          ry="150"
+          fill="oklch(0.90 0.055 218)"
+        />
+        <ellipse
+          cx="300"
+          cy="480"
+          rx="180"
+          ry="140"
+          fill="oklch(0.88 0.07 10)"
+        />
+      </svg>
+      {/* Floating geometric shapes */}
+      <svg
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 1200 700"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Stars */}
+        <polygon
+          points="80,60 88,82 112,82 94,96 101,118 80,104 59,118 66,96 48,82 72,82"
+          fill="oklch(0.89 0.12 87)"
+          opacity="0.7"
+        />
+        <polygon
+          points="1100,120 1106,138 1124,138 1110,149 1115,167 1100,156 1085,167 1090,149 1076,138 1094,138"
+          fill="oklch(0.88 0.07 10)"
+          opacity="0.55"
+        />
+        <polygon
+          points="200,580 206,598 224,598 210,609 215,627 200,616 185,627 190,609 176,598 194,598"
+          fill="oklch(0.90 0.055 218)"
+          opacity="0.5"
+        />
+        {/* Circles */}
+        <circle
+          cx="1060"
+          cy="540"
+          r="28"
+          fill="oklch(0.89 0.065 148)"
+          opacity="0.45"
+        />
+        <circle
+          cx="140"
+          cy="380"
+          r="18"
+          fill="oklch(0.91 0.11 87)"
+          opacity="0.4"
+        />
+        <circle
+          cx="600"
+          cy="80"
+          r="12"
+          fill="oklch(0.88 0.07 10)"
+          opacity="0.35"
+        />
+        {/* Arc / rainbow hint */}
+        <path
+          d="M 900 620 Q 960 530 1020 620"
+          stroke="oklch(0.89 0.12 87)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          fill="none"
+          opacity="0.5"
+        />
+        <path
+          d="M 910 630 Q 960 545 1010 630"
+          stroke="oklch(0.90 0.055 218)"
+          strokeWidth="4"
+          strokeLinecap="round"
+          fill="none"
+          opacity="0.4"
+        />
+        {/* Dots grid top-left */}
+        {[0, 1, 2, 3].map((r) =>
+          [0, 1, 2, 3].map((c) => (
+            <circle
+              key={`${r}-${c}`}
+              cx={40 + c * 22}
+              cy={140 + r * 22}
+              r="3"
+              fill="oklch(0.78 0.14 62)"
+              opacity="0.18"
+            />
+          )),
+        )}
+      </svg>
+    </>
+  );
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
+function SiteApp({
+  onLogout,
+  userName,
+}: { onLogout?: () => void; userName?: string }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [formData, setFormData] = useState({
+    studentName: "",
+    studentAge: "",
+    parentName: "",
+    mobile: "",
+    address1: "",
+    address2: "",
+    postcode: "",
+    message: "",
+    type: "enroll" as "enroll" | "visit",
+  });
+
+  const goToContact = (type: "enroll" | "visit") => {
+    setFormData((p) => ({ ...p, type }));
+    setTimeout(() => {
+      document
+        .getElementById("contact")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  };
+  const { mutate: submitInquiry, isPending, isSuccess } = useSubmitInquiry();
+  const [shuffledTestimonials, _setShuffledTestimonials] = useState(() => {
+    const arr = [...TESTIMONIALS];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  });
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const prevTestimonial = () =>
+    setTestimonialIdx(
+      (i) =>
+        (i - 1 + shuffledTestimonials.length) % shuffledTestimonials.length,
+    );
+  const nextTestimonial = () =>
+    setTestimonialIdx((i) => (i + 1) % shuffledTestimonials.length);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const waNumber = "919865875567";
+    const inquiryType =
+      formData.type === "enroll" ? "Enrollment Inquiry" : "Visit Booking";
+    const text = `*New ${inquiryType} - SRA Little Buds Academy*\n\n*Student Name:* ${formData.studentName}\n*Age of Student:* ${formData.studentAge}\n*Parent/Guardian Name:* ${formData.parentName}\n*Mobile:* ${formData.mobile}\n*Address 1:* ${formData.address1}\n*Address 2:* ${formData.address2}\n*Postcode:* ${formData.postcode}\n*Message:* ${formData.message}`;
+    window.open(
+      `https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`,
+      "_blank",
+    );
+    submitInquiry(
+      {
+        name: formData.parentName,
+        phone: formData.mobile,
+        message: `Student: ${formData.studentName} (Age: ${formData.studentAge}), Address: ${formData.address1}, ${formData.address2} - ${formData.postcode}. ${formData.message}`,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Opening WhatsApp with your details... 🌸");
+          setFormData({
+            studentName: "",
+            studentAge: "",
+            parentName: "",
+            mobile: "",
+            address1: "",
+            address2: "",
+            postcode: "",
+            message: "",
+            type: "enroll",
+          });
+        },
+        onError: () => {
+          toast.success("Opening WhatsApp with your details... 🌸");
+          setFormData({
+            studentName: "",
+            studentAge: "",
+            parentName: "",
+            mobile: "",
+            address1: "",
+            address2: "",
+            postcode: "",
+            message: "",
+            type: "enroll",
+          });
+        },
+      },
+    );
+  };
+
+  const visibleTestimonials = [
+    shuffledTestimonials[testimonialIdx],
+    shuffledTestimonials[(testimonialIdx + 1) % shuffledTestimonials.length],
+    shuffledTestimonials[(testimonialIdx + 2) % shuffledTestimonials.length],
+  ];
+
+  return (
+    <div className="font-nunito min-h-screen bg-background">
+      {/* ── Sticky Navbar ── */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/96 backdrop-blur-md shadow-soft"
+            : "bg-white/80 backdrop-blur-sm"
+        }`}
+        data-ocid="nav.panel"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            <a
+              href="#home"
+              className="flex items-center gap-2.5 group"
+              data-ocid="nav.link"
+            >
+              <img
+                src={logoImg}
+                alt="SRA Little Buds Academy"
+                className="h-10 w-auto"
+              />
+            </a>
+
+            <nav className="hidden lg:flex items-center gap-0.5">
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="px-3.5 py-1.5 text-sm font-semibold text-foreground/65 hover:text-foreground rounded-full hover:bg-primary/10 transition-all duration-200"
+                  data-ocid="nav.link"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                className="hidden sm:flex rounded-full font-bold px-6 py-2 h-auto text-sm shadow-sm"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(0.78 0.14 62), oklch(0.85 0.13 80))",
+                  color: "oklch(0.15 0 0)",
+                }}
+                onClick={() => goToContact("enroll")}
+                data-ocid="nav.primary_button"
+              >
+                Enroll Now
+              </Button>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors border border-border"
+                  title={userName ? `Logged in as ${userName}` : "Logout"}
+                  data-ocid="nav.toggle"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              )}
+              <button
+                type="button"
+                className="lg:hidden p-2 rounded-full hover:bg-muted transition-colors"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+                data-ocid="nav.toggle"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden bg-white border-t border-border overflow-hidden"
+              data-ocid="nav.modal"
+            >
+              <div className="px-4 py-4 flex flex-col gap-1">
+                {NAV_LINKS.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-2.5 font-semibold text-foreground/80 hover:text-foreground rounded-xl hover:bg-muted transition-colors"
+                    data-ocid="nav.link"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+                <Button
+                  className="w-full rounded-full font-bold mt-2"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, oklch(0.78 0.14 62), oklch(0.85 0.13 80))",
+                    color: "oklch(0.15 0 0)",
+                  }}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    goToContact("enroll");
+                  }}
+                >
+                  Enroll Now
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      <main>
+        {/* ── Hero ── */}
+        <section
+          id="home"
+          className="relative min-h-screen flex items-center bg-cream overflow-hidden pt-16"
+        >
+          <HeroDoodles />
+
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center py-20">
+              {/* Left */}
+              <motion.div
+                initial={{ opacity: 0, x: -36 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.75, ease: "easeOut" }}
+              >
+                <div className="inline-flex items-center gap-2 bg-white/80 border border-border rounded-full px-4 py-1.5 mb-7 shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-xs font-black text-foreground/70 tracking-wide">
+                    Women-Owned · Est. 2021 · Sulur, Tamil Nadu
+                  </span>
+                </div>
+
+                <h1 className="text-4xl sm:text-5xl lg:text-[58px] font-black text-foreground leading-[1.08] mb-6 tracking-tight">
+                  Nurturing
+                  <span className="block text-gradient-apricot">
+                    Young Minds
+                  </span>
+                  <span className="block">for a Bright Future</span>
+                </h1>
+
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-9 max-w-lg">
+                  SRA Little Buds Academy is a premium Montessori play school
+                  where every child blossoms. Advanced teaching methods,
+                  audio-visual learning, and a safe, loving environment—all
+                  under one roof.
+                </p>
+
+                <div className="flex flex-wrap gap-3 mb-10">
+                  <Button
+                    type="button"
+                    className="rounded-full font-black text-[15px] px-8 py-3.5 h-auto shadow-elevated transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(0.68 0.17 50), oklch(0.85 0.14 72))",
+                      color: "#fff",
+                    }}
+                    onClick={() => goToContact("enroll")}
+                    data-ocid="hero.primary_button"
+                  >
+                    Enroll Your Child
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full font-bold text-[15px] px-8 py-3.5 h-auto border-2 border-foreground/20 hover:border-primary hover:bg-primary/5 transition-colors"
+                    onClick={() => goToContact("visit")}
+                    data-ocid="hero.secondary_button"
+                  >
+                    Book a Visit
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap gap-2.5">
+                  {[
+                    "🎨 Montessori",
+                    "🖥️ Audio-Visual",
+                    "🛡️ Safe & Secure",
+                    "🎯 Activity-Based",
+                  ].map((item) => (
+                    <span
+                      key={item}
+                      className="bg-white/90 border border-border rounded-full px-4 py-1.5 text-xs font-bold text-foreground/75 shadow-xs"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Right — image with halo */}
+              <motion.div
+                initial={{ opacity: 0, x: 36 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.75, delay: 0.18, ease: "easeOut" }}
+                className="relative flex justify-center lg:justify-end"
+              >
+                <div className="relative w-full max-w-[440px]">
+                  {/* Pulsing ring halo */}
+                  <div
+                    className="absolute inset-0 rounded-[2rem] pulse-ring"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(0.91 0.11 87 / 0.6), oklch(0.90 0.055 218 / 0.4))",
+                    }}
+                  />
+                  {/* Offset shadow card */}
+                  <div
+                    className="absolute inset-0 rounded-[2rem] translate-x-3 translate-y-3"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(0.89 0.12 87 / 0.45), oklch(0.88 0.07 10 / 0.35))",
+                    }}
+                  />
+                  <img
+                    src={heroImg}
+                    alt="Teacher with children learning at SRA Little Buds Academy"
+                    className="relative rounded-[2rem] shadow-elevated w-full object-cover aspect-[4/3] z-10"
+                  />
+                  {/* Rating badge */}
+                  <div className="absolute -bottom-5 -left-5 z-20 bg-white rounded-2xl shadow-elevated px-4 py-3 flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-yellow-pastel flex items-center justify-center text-xl">
+                      ⭐
+                    </div>
+                    <div>
+                      <div className="font-black text-sm text-foreground leading-tight">
+                        4.7 / 5.0
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        71 Parent Reviews
+                      </div>
+                    </div>
+                  </div>
+                  {/* Kids badge */}
+                  <div className="absolute -top-5 -right-5 z-20 bg-white rounded-2xl shadow-elevated px-4 py-3 text-center">
+                    <div className="font-black text-2xl text-foreground leading-none">
+                      140+
+                    </div>
+                    <div className="text-xs text-muted-foreground font-bold mt-0.5">
+                      Happy Kids
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Wave divider */}
+          <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none pointer-events-none">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 1440 56"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+              className="w-full h-14"
+            >
+              <path
+                d="M0 56 L0 28 Q360 0 720 28 Q1080 56 1440 28 L1440 56 Z"
+                fill="white"
+              />
+            </svg>
+          </div>
+        </section>
+
+        {/* ── About Us ── */}
+        <section id="about" className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealSection>
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className="relative">
+                  <div
+                    className="absolute inset-0 rounded-[2rem] -rotate-2 opacity-50"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(0.89 0.065 148 / 0.4), oklch(0.90 0.055 218 / 0.4))",
+                    }}
+                  />
+                  <img
+                    src={aboutImg}
+                    alt="Our Montessori classroom"
+                    className="relative rounded-[2rem] shadow-soft w-full object-cover aspect-[4/3]"
+                  />
+                  <div className="absolute -bottom-5 -right-5 bg-green-pastel rounded-2xl px-5 py-4 shadow-card">
+                    <div className="font-black text-2xl">🌱</div>
+                    <div className="font-bold text-sm text-foreground/80">
+                      Holistic Learning
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="inline-flex items-center gap-2 mb-4">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                    <span className="text-xs font-black uppercase tracking-[0.18em] text-primary">
+                      About Our School
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-6 leading-tight heading-accent pb-4">
+                    Where Little Buds Bloom into Confident Learners
+                  </h2>
+                  <p className="text-muted-foreground leading-relaxed mb-4">
+                    SRA Little Buds Academy is run by the{" "}
+                    <strong className="text-foreground/85">
+                      Sree Arumugham Valliammal Educational and Charitable Trust
+                    </strong>
+                    . We believe every child is unique, and our mission is to
+                    create an environment where each little bud can blossom at
+                    their own pace.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed mb-7">
+                    Our teachers undergo continuous training to maintain the
+                    highest educational standards. We follow an integrated
+                    Montessori curriculum with spacious rooms designed to
+                    encourage exploration, creativity, and independent thinking.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2.5 mb-8">
+                    {[
+                      "🏛️ Est. 2021",
+                      "♀️ Women-Owned",
+                      "📜 Montessori Certified",
+                      "⭐ 4.7 Rating",
+                    ].map((chip) => (
+                      <span
+                        key={chip}
+                        className="bg-yellow-pastel rounded-full px-4 py-1.5 text-sm font-bold text-foreground/80"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { value: "140+", label: "Happy Students" },
+                      { value: "15+", label: "Trained Teachers" },
+                      { value: "5", label: "Years of Excellence" },
+                    ].map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="bg-cream rounded-2xl px-4 py-5 text-center border border-border/60"
+                      >
+                        <div className="font-black text-2xl text-foreground">
+                          {stat.value}
+                        </div>
+                        <div className="text-xs font-semibold text-muted-foreground mt-1 leading-tight">
+                          {stat.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </RevealSection>
+          </div>
+        </section>
+
+        {/* ── Programs ── */}
+        <section id="programs" className="py-24 bg-cream">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealSection>
+              <SectionHeader
+                eyebrow="What We Offer"
+                title="Explore Our Programs"
+                subtitle="Thoughtfully designed programs that blend Montessori philosophy with modern teaching for well-rounded early childhood development."
+              />
+            </RevealSection>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {PROGRAMS.map((prog, i) => (
+                <RevealSection key={prog.title}>
+                  <motion.div
+                    whileHover={{
+                      y: -8,
+                      boxShadow: "0 12px 40px 0 rgba(0,0,0,0.10)",
+                    }}
+                    transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                    className={`${prog.bg} rounded-3xl p-7 h-full flex flex-col border border-white/60`}
+                    data-ocid={`programs.item.${i + 1}`}
+                  >
+                    <div className="text-5xl mb-5 drop-shadow-sm">
+                      {prog.icon}
+                    </div>
+                    <div className="font-black text-lg text-foreground mb-1 leading-tight">
+                      {prog.title}
+                    </div>
+                    <div className="text-xs font-bold text-foreground/55 mb-3 bg-white/70 rounded-full px-3 py-1 w-fit">
+                      {prog.age}
+                    </div>
+                    <p className="text-sm text-foreground/70 leading-relaxed flex-1">
+                      {prog.desc}
+                    </p>
+                    <a
+                      href="#contact"
+                      className="mt-5 text-sm font-black text-foreground/75 hover:text-foreground flex items-center gap-1 group transition-colors"
+                    >
+                      Learn More
+                      <span className="group-hover:translate-x-1.5 transition-transform">
+                        →
+                      </span>
+                    </a>
+                  </motion.div>
+                </RevealSection>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Facilities ── */}
+        <section id="facilities" className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealSection>
+              <SectionHeader
+                eyebrow="Our Campus"
+                title="World-Class Facilities"
+                subtitle="Every space at SRA Little Buds Academy is thoughtfully designed for children's safety, learning, and joy."
+              />
+            </RevealSection>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {FACILITIES.map((fac, i) => (
+                <RevealSection key={fac.title}>
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                    className="bg-white rounded-3xl p-7 shadow-card hover:shadow-elevated transition-shadow border border-border/50 flex gap-5"
+                    data-ocid={`facilities.item.${i + 1}`}
+                  >
+                    <div
+                      className={`w-14 h-14 ${fac.iconBg} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 shadow-xs`}
+                    >
+                      {fac.icon}
+                    </div>
+                    <div>
+                      <div className="font-black text-base text-foreground mb-1.5 leading-tight">
+                        {fac.title}
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {fac.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+                </RevealSection>
+              ))}
+            </div>
+
+            {/* Meal Policy Callout */}
+            <RevealSection>
+              <div className="mt-10 flex items-start gap-5 bg-white border border-border rounded-3xl px-7 py-6 shadow-card max-w-3xl mx-auto">
+                <div className="text-4xl flex-shrink-0">🥗</div>
+                <div>
+                  <div className="font-black text-base text-foreground mb-1">
+                    Healthy Meal Policy
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Students bring their own meals to school. Parents are kindly
+                    requested to pack{" "}
+                    <strong>only healthy, nutritious food</strong> — fruits,
+                    sandwiches, home-cooked meals, and wholesome snacks are
+                    welcome.{" "}
+                    <strong>
+                      Junk food, chips, and sugary snacks are not permitted.
+                    </strong>{" "}
+                    Let's nourish our little ones right! 🌱
+                  </p>
+                </div>
+              </div>
+            </RevealSection>
+          </div>
+        </section>
+
+        {/* ── Gallery ── */}
+        <section id="gallery" className="py-24 bg-cream">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealSection>
+              <SectionHeader
+                eyebrow="Life at SRA"
+                title="Moments of Joy & Learning"
+                subtitle="A glimpse into the vibrant, colourful world of SRA Little Buds Academy."
+              />
+            </RevealSection>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {GALLERY_ITEMS.map((item, i) => (
+                <RevealSection key={item.label}>
+                  <motion.div
+                    whileHover={{ scale: 1.025 }}
+                    transition={{ type: "spring", stiffness: 320 }}
+                    className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-card cursor-pointer"
+                    data-ocid={`gallery.item.${i + 1}`}
+                  >
+                    <img
+                      src={item.src}
+                      alt={item.label}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+                    <div className="absolute bottom-3 left-3">
+                      <span className="bg-white/92 backdrop-blur-sm text-foreground font-bold text-xs px-3 py-1.5 rounded-full shadow-xs">
+                        {item.label}
+                      </span>
+                    </div>
+                  </motion.div>
+                </RevealSection>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Testimonials ── */}
+        <section id="testimonials" className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealSection>
+              <SectionHeader
+                eyebrow="Parent Stories"
+                title="Our Joyful Community"
+              />
+              <div className="flex items-center justify-center gap-3 -mt-8 mb-14">
+                <div className="flex gap-0.5">
+                  {["s1", "s2", "s3", "s4"].map((k) => (
+                    <Star
+                      key={k}
+                      className="w-5 h-5 fill-amber-400 text-amber-400"
+                    />
+                  ))}
+                  <Star className="w-5 h-5 fill-amber-400/60 text-amber-400" />
+                </div>
+                <span className="font-black text-foreground text-lg">4.7</span>
+                <span className="text-muted-foreground text-sm">
+                  based on 71 reviews
+                </span>
+              </div>
+            </RevealSection>
+
+            <div className="relative">
+              {/* Desktop: 3-up */}
+              <div className="hidden md:grid md:grid-cols-3 gap-6">
+                {visibleTestimonials.map((t, i) => (
+                  <motion.div
+                    key={t.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`bg-white rounded-3xl shadow-card border-t-4 ${t.borderColor} flex flex-col overflow-hidden`}
+                    data-ocid={`testimonials.item.${i + 1}`}
+                  >
+                    {/* Quote glyph */}
+                    <div className="px-7 pt-6 pb-0">
+                      <span
+                        className="block font-black leading-none select-none"
+                        style={{
+                          fontSize: "72px",
+                          lineHeight: "0.7",
+                          color: "oklch(0.91 0.11 87)",
+                          marginBottom: "8px",
+                        }}
+                        aria-hidden="true"
+                      >
+                        &ldquo;
+                      </span>
+                      <StarRating count={t.rating} />
+                      <p className="text-sm text-foreground/80 leading-relaxed mt-3 flex-1">
+                        {t.quote}
+                      </p>
+                    </div>
+                    <div
+                      className={`flex items-center gap-3 px-7 py-5 mt-auto ${t.accentClass} mx-4 mb-4 rounded-2xl`}
+                    >
+                      <div className="w-10 h-10 bg-white/70 rounded-full flex items-center justify-center font-black text-sm text-foreground/75 flex-shrink-0">
+                        {t.initials}
+                      </div>
+                      <div>
+                        <div className="font-black text-sm text-foreground leading-tight">
+                          {t.name}
+                        </div>
+                        <div className="text-xs text-foreground/60">
+                          {t.role}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Mobile: 1-up */}
+              <div className="md:hidden">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={testimonialIdx}
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -40 }}
+                    className={`bg-white rounded-3xl shadow-card border-t-4 ${shuffledTestimonials[testimonialIdx].borderColor} overflow-hidden`}
+                    data-ocid="testimonials.item.1"
+                  >
+                    <div className="px-7 pt-6 pb-4">
+                      <span
+                        className="block font-black leading-none select-none"
+                        style={{
+                          fontSize: "72px",
+                          lineHeight: "0.7",
+                          color: "oklch(0.91 0.11 87)",
+                          marginBottom: "8px",
+                        }}
+                        aria-hidden="true"
+                      >
+                        &ldquo;
+                      </span>
+                      <StarRating
+                        count={shuffledTestimonials[testimonialIdx].rating}
+                      />
+                      <p className="text-sm text-foreground/80 leading-relaxed mt-3">
+                        {shuffledTestimonials[testimonialIdx].quote}
+                      </p>
+                    </div>
+                    <div
+                      className={`flex items-center gap-3 px-7 py-4 mx-4 mb-4 rounded-2xl ${shuffledTestimonials[testimonialIdx].accentClass}`}
+                    >
+                      <div className="w-10 h-10 bg-white/70 rounded-full flex items-center justify-center font-black text-sm text-foreground/75">
+                        {shuffledTestimonials[testimonialIdx].initials}
+                      </div>
+                      <div>
+                        <div className="font-black text-sm text-foreground">
+                          {shuffledTestimonials[testimonialIdx].name}
+                        </div>
+                        <div className="text-xs text-foreground/60">
+                          {shuffledTestimonials[testimonialIdx].role}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={prevTestimonial}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors shadow-card"
+                  data-ocid="testimonials.pagination_prev"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <div className="flex gap-2">
+                  {shuffledTestimonials.map((t, i) => (
+                    <button
+                      key={t.name}
+                      type="button"
+                      onClick={() => setTestimonialIdx(i)}
+                      className={`rounded-full transition-all duration-300 ${
+                        i === testimonialIdx
+                          ? "w-6 h-3 bg-primary"
+                          : "w-3 h-3 bg-muted-foreground/30"
+                      }`}
+                      data-ocid="testimonials.toggle"
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={nextTestimonial}
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors shadow-card"
+                  data-ocid="testimonials.pagination_next"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Contact ── */}
+        <section id="contact" className="py-24 bg-cream">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealSection>
+              <SectionHeader
+                eyebrow="Get in Touch"
+                title="Start Your Child's Journey"
+                subtitle="We'd love to hear from you. Send us a message or visit us at our campus in Sulur, Tamil Nadu."
+              />
+            </RevealSection>
+
+            <div className="grid lg:grid-cols-2 gap-10">
+              <RevealSection>
+                <div
+                  className="bg-white rounded-3xl shadow-soft p-8 sm:p-10"
+                  data-ocid="contact.panel"
+                >
+                  <h3 className="font-black text-xl text-foreground mb-6">
+                    Send Us a Message
+                  </h3>
+                  {isSuccess ? (
+                    <div
+                      className="text-center py-10"
+                      data-ocid="contact.success_state"
+                    >
+                      <div className="text-5xl mb-4">🎉</div>
+                      <div className="font-black text-xl text-foreground mb-2">
+                        Inquiry Sent!
+                      </div>
+                      <p className="text-muted-foreground">
+                        Thank you for reaching out. We'll contact you shortly.
+                      </p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleFormSubmit} className="space-y-5">
+                      {/* Inquiry Type Toggle */}
+                      <div>
+                        <p className="text-sm font-bold text-foreground/70 mb-2">
+                          I want to…
+                        </p>
+                        <div className="flex gap-2 p-1 bg-muted rounded-2xl">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData((p) => ({ ...p, type: "enroll" }))
+                            }
+                            className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all duration-200 ${formData.type === "enroll" ? "bg-white shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                            data-ocid="contact.toggle"
+                          >
+                            🎒 Enroll My Child
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData((p) => ({ ...p, type: "visit" }))
+                            }
+                            className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all duration-200 ${formData.type === "visit" ? "bg-white shadow-soft text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                            data-ocid="contact.toggle"
+                          >
+                            👀 Book a Visit
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="studentName"
+                        >
+                          Student's Name *
+                        </label>
+                        <Input
+                          id="studentName"
+                          placeholder="Child's full name"
+                          value={formData.studentName}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              studentName: e.target.value,
+                            }))
+                          }
+                          required
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="parentName"
+                        >
+                          Parent's / Guardian's Name *
+                        </label>
+                        <Input
+                          id="parentName"
+                          placeholder="Parent or guardian name"
+                          value={formData.parentName}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              parentName: e.target.value,
+                            }))
+                          }
+                          required
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="mobile"
+                        >
+                          Mobile Number *
+                        </label>
+                        <Input
+                          id="mobile"
+                          type="tel"
+                          placeholder="+91 98765 43210"
+                          value={formData.mobile}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              mobile: e.target.value,
+                            }))
+                          }
+                          required
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="studentAge"
+                        >
+                          Age of Student *
+                        </label>
+                        <Input
+                          id="studentAge"
+                          placeholder="e.g. 3 years"
+                          value={formData.studentAge}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              studentAge: e.target.value,
+                            }))
+                          }
+                          required
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="address1"
+                        >
+                          Address 1 *{" "}
+                          <span className="font-normal text-muted-foreground">
+                            (House no., Street)
+                          </span>
+                        </label>
+                        <Input
+                          id="address1"
+                          placeholder="House no., Street"
+                          value={formData.address1}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              address1: e.target.value,
+                            }))
+                          }
+                          required
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="address2"
+                        >
+                          Address 2{" "}
+                          <span className="font-normal text-muted-foreground">
+                            (City)
+                          </span>
+                        </label>
+                        <Input
+                          id="address2"
+                          placeholder="City"
+                          value={formData.address2}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              address2: e.target.value,
+                            }))
+                          }
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="postcode"
+                        >
+                          Postcode *
+                        </label>
+                        <Input
+                          id="postcode"
+                          placeholder="e.g. 641401"
+                          value={formData.postcode}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              postcode: e.target.value,
+                            }))
+                          }
+                          required
+                          className="rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary/30"
+                          data-ocid="contact.input"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          className="text-sm font-bold text-foreground/70 mb-1.5 block"
+                          htmlFor="message"
+                        >
+                          Message
+                        </label>
+                        <textarea
+                          id="message"
+                          rows={3}
+                          placeholder="Any additional information..."
+                          value={formData.message}
+                          onChange={(e) =>
+                            setFormData((p) => ({
+                              ...p,
+                              message: e.target.value,
+                            }))
+                          }
+                          className="w-full rounded-xl border border-border bg-muted focus:ring-2 focus:ring-primary/30 px-3 py-2 text-sm resize-none"
+                          data-ocid="contact.textarea"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={isPending}
+                        className="w-full rounded-full font-black py-3.5 h-auto shadow-soft transition-transform hover:scale-[1.01]"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, oklch(0.68 0.17 50), oklch(0.85 0.14 72))",
+                          color: "#fff",
+                        }}
+                        data-ocid="contact.submit_button"
+                      >
+                        {isPending ? "Sending..." : "Send Inquiry 🌱"}
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              </RevealSection>
+
+              <RevealSection>
+                <div className="space-y-6">
+                  <div className="bg-white rounded-3xl shadow-soft p-8">
+                    <h3 className="font-black text-xl text-foreground mb-6">
+                      Visit Us
+                    </h3>
+                    <div className="space-y-4">
+                      {[
+                        {
+                          icon: <MapPin className="w-5 h-5 text-amber-700" />,
+                          bg: "bg-yellow-pastel",
+                          label: "Address",
+                          content: (
+                            <span className="text-sm text-muted-foreground leading-relaxed">
+                              24CQ+P57, Behind Kongu Mahal,
+                              <br />
+                              Brindavan Garden, Sulur,
+                              <br />
+                              Tamil Nadu – 641401
+                            </span>
+                          ),
+                        },
+                        {
+                          icon: <Phone className="w-5 h-5 text-blue-700" />,
+                          bg: "bg-blue-pastel",
+                          label: "Phone",
+                          content: (
+                            <a
+                              href="tel:+919865875567"
+                              className="text-sm text-muted-foreground hover:text-foreground font-semibold transition-colors"
+                            >
+                              +91 98658 75567
+                            </a>
+                          ),
+                        },
+                        {
+                          icon: <Clock className="w-5 h-5 text-rose-700" />,
+                          bg: "bg-pink-pastel",
+                          label: "Hours",
+                          content: (
+                            <span className="text-sm text-muted-foreground">
+                              Opens at 9:00 AM (Mon–Sat)
+                            </span>
+                          ),
+                        },
+                      ].map((row) => (
+                        <div key={row.label} className="flex items-start gap-3">
+                          <div
+                            className={`w-10 h-10 ${row.bg} rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5`}
+                          >
+                            {row.icon}
+                          </div>
+                          <div>
+                            <div className="font-bold text-sm text-foreground">
+                              {row.label}
+                            </div>
+                            {row.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-3xl overflow-hidden shadow-soft">
+                    <iframe
+                      src="https://maps.google.com/maps?q=24CQ%2BP57+Sulur+Tamil+Nadu&output=embed"
+                      width="100%"
+                      height="250"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="SRA Little Buds Academy Location"
+                    />
+                  </div>
+                </div>
+              </RevealSection>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="bg-gray-950 text-white pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+            <div className="lg:col-span-1">
+              <div className="flex items-center gap-2.5 mb-4">
+                <img
+                  src={logoImg}
+                  alt="SRA Little Buds Academy"
+                  className="h-12 w-auto"
+                />
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed mb-5">
+                A premium Montessori kindergarten nurturing young minds in
+                Sulur, Tamil Nadu since 2021.
+              </p>
+              <div
+                className="inline-flex items-center gap-2 border border-amber-400/25 rounded-full px-3 py-1.5"
+                style={{ background: "oklch(0.91 0.11 87 / 0.12)" }}
+              >
+                <Heart className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs font-bold text-amber-300">
+                  Women-Owned Business
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <div className="font-black text-white text-sm mb-5 uppercase tracking-wider">
+                Quick Links
+              </div>
+              <ul className="space-y-2.5">
+                {NAV_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      className="text-gray-400 hover:text-white text-sm font-medium transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <div className="font-black text-white text-sm mb-5 uppercase tracking-wider">
+                Programs
+              </div>
+              <ul className="space-y-2.5">
+                {PROGRAMS.map((p) => (
+                  <li key={p.title}>
+                    <span className="text-gray-400 text-sm">
+                      {p.icon} {p.title}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <div className="font-black text-white text-sm mb-5 uppercase tracking-wider">
+                Contact
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-400 text-sm">
+                    Brindavan Garden, Sulur, Tamil Nadu – 641401
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <a
+                    href="tel:+919865875567"
+                    className="text-gray-400 hover:text-white text-sm transition-colors"
+                  >
+                    +91 98658 75567
+                  </a>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <a
+                  href="https://wa.me/919865875567"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-green-600 hover:bg-green-500 rounded-full flex items-center justify-center transition-colors"
+                  aria-label="WhatsApp"
+                >
+                  <SiWhatsapp className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-blue-700 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors"
+                  aria-label="Facebook"
+                >
+                  <SiFacebook className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-pink-600 hover:bg-pink-500 rounded-full flex items-center justify-center transition-colors"
+                  aria-label="Instagram"
+                >
+                  <SiInstagram className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors"
+                  aria-label="YouTube"
+                >
+                  <SiYoutube className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-white/8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-gray-500 text-sm">
+              © {new Date().getFullYear()} SRA Little Buds Academy. All rights
+              reserved.
+            </p>
+            <a
+              href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+            >
+              Built with <Heart className="inline w-3 h-3 text-rose-400" />{" "}
+              using caffeine.ai
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {/* ── WhatsApp Float ── */}
+      <motion.a
+        href="https://wa.me/919865875567"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-400 text-white rounded-full flex items-center justify-center shadow-elevated transition-colors"
+        aria-label="Chat on WhatsApp"
+        whileHover={{ scale: 1.12 }}
+        whileTap={{ scale: 0.94 }}
+        data-ocid="nav.secondary_button"
+      >
+        <SiWhatsapp className="w-7 h-7" />
+      </motion.a>
+    </div>
+  );
+}
+
+// ─── Auth Wrapper ─────────────────────────────────────────────────────────────
+const AUTH_STORAGE_KEY = "sra_auth";
+
+export default function App() {
+  const [currentUser, setCurrentUser] = useState<string | null>(() => {
+    try {
+      const s = localStorage.getItem(AUTH_STORAGE_KEY);
+      return s ? JSON.parse(s).name : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleLogin = (user: { email: string; name: string }) => {
+    localStorage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({ name: user.name, email: user.email }),
+    );
+    setCurrentUser(user.name);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    setCurrentUser(null);
+  };
+
+  if (!currentUser) {
+    return (
+      <>
+        <AuthPage onLogin={handleLogin} />
+        <Toaster />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SiteApp onLogout={handleLogout} userName={currentUser} />
+      <Toaster />
+    </>
+  );
+}
